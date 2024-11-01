@@ -103,14 +103,13 @@ const LearnerSubmissions = [
 // create an array that returns the learner submission data in the format shown above and that filters out any assignment that is not due by the current date.
 // and also calculagtes the score of the assignments based on the submission date(10% deduction from the total score if it is late).
 
- function getLearnerData(course, ag, submissions) {
-  let validGroup = validationOfAssignmentGroup(course,ag);
-  if (validGroup == null){
-    return 
-   
-  }
+//  function getLearnerData(course, ag, submissions) {
+//   let validGroup = validationOfAssignmentGroup(course,ag);
+//   if (validGroup === null){
+//     return []
+//   }
 
-}
+// }
 
 
 // Helper function that calculates the valid submissions. 
@@ -123,13 +122,31 @@ function validationOfAssignmentGroup(courseInfo,assignmGroup){
     if (assignmGroup.course_id !== courseInfo.id){
         throw new Error (`AssignmentGroup ID ${assignmGroup.course_id} does not match with the Course with ID ${courseInfo.id}`)
       }
-      // if the id match return the group
-    return assignmGroup
+     
+      // console.log("Course ID validation passed.");
     }catch (error){
       console.error(`Skipping Group ${error}`)
-    } 
+      return null  // Return early if IDs don't match
+    }  
 
-    // the function will return null if the id do not match
-    return null
+    // check if the points_possible is not valid
+    // the function will return null if the points_possible is not a number or the points_possible is less than 0
+      try{
+      assignmGroup.assignments.forEach(assignment => {
+    if (typeof assignment.points_possible !== "number" || assignment.points_possible <= 0){
+      throw new Error (`Invalid points_possible ,${assignment.points_possible } points, for assignment ${assignment.id}`)
+
+    }
+  });
+  // console.log("Assignments validation passed.");
+  }catch (error){
+    console.error(`Skipping Group !${error} `)
+    return null  // Return early if points_possible is not a number or less than 0
+  }
+    // the function will return null if the id do not match or the points_possible is not a number or the points_possible is less than 0
+    return assignmGroup
     
   }
+
+let validGroup = validationOfAssignmentGroup(CourseInfo,AssignmentGroup);
+console.log(validGroup);
