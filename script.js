@@ -76,26 +76,57 @@ const LearnerSubmissions = [
   }
 ];
 
-function getLearnerData(course, ag, submissions) {
+//function getLearnerData(course, ag, submissions) {
   // here, we would process this data to achieve the desired result.
-  const result = [
-    {
-      id: 125,
-      avg: 0.985, // (47 + 150) / (50 + 150)
-      1: 0.94, // 47 / 50
-      2: 1.0 // 150 / 150
-    },
-    {
-      id: 132,
-      avg: 0.82, // (39 + 125) / (50 + 150)
-      1: 0.78, // 39 / 50
-      2: 0.833 // late: (140 - 15) / 150
-    }
-  ];
+//   const result = [
+//     {
+//       id: 125,
+//       avg: 0.985, // (47 + 150) / (50 + 150)
+//       1: 0.94, // 47 / 50
+//       2: 1.0 // 150 / 150
+//     },
+//     {
+//       id: 132,
+//       avg: 0.82, // (39 + 125) / (50 + 150)
+//       1: 0.78, // 39 / 50
+//       2: 0.833 // late: (140 - 15) / 150
+//     }
+//   ];
 
-  return result;
-}
+//   return result;
+// }
 
-const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
+// const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
 
+// console.log(result);
+
+// create an array that returns the learner submission data in the format shown above and that filters out any assignment that is not due by the current date.
+// and also calculagtes the score of the assignments based on the submission date(10% deduction from the total score if it is late).
+
+ function getLearnerData(course, ag, submissions) {
+
+  }
+
+
+// Helper function that calculates the valid submissions. 
+//Valid submissions are considered the ones that course's id matches 
+
+function validationOfAssignmentGroup(courseInfo,assignmGroup){
+  // check if ids do not match
+    // the try catch block will throw an error if the id do not match
+    try {
+    if (assignmGroup.course_id !== courseInfo.id){
+        throw new Error (`AssignmentGroup ID ${assignmGroup.course_id} does not match with the Course with ID ${courseInfo.id}`)
+      }
+      // if the id match return the group
+    return assignmGroup
+    }catch (error){
+      console.error(`Skipping Group ${error}`)
+    } 
+
+    // the function will return null if the id do not match
+    return null
+    
+  }
+let result  = validationOfAssignmentGroup(CourseInfo,AssignmentGroup)
 console.log(result);
