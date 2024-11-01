@@ -104,8 +104,13 @@ const LearnerSubmissions = [
 // and also calculagtes the score of the assignments based on the submission date(10% deduction from the total score if it is late).
 
  function getLearnerData(course, ag, submissions) {
-
+  let validGroup = validationOfAssignmentGroup(course,ag);
+  if (validGroup == null){
+    return 
+   
   }
+
+}
 
 
 // Helper function that calculates the valid submissions. 
@@ -128,5 +133,3 @@ function validationOfAssignmentGroup(courseInfo,assignmGroup){
     return null
     
   }
-let result  = validationOfAssignmentGroup(CourseInfo,AssignmentGroup)
-console.log(result);
