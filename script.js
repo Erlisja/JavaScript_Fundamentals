@@ -96,20 +96,20 @@ const LearnerSubmissions = [
 //   return result;
 // }
 
-// const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
+function getLearnerData(course, ag, submissions) {
+  const validGroupAssignments = validationOfAssignmentGroup(course, ag);
+  if (validGroupAssignments === null) {
+    return []; // Exit if assignment group is invalid
+  }
 
-// console.log(result);
+  const result = [];
+  const submissionsByLearner = groupSubmissionsByLearner(submissions);
+  
+  return result;
+}
 
 // create an array that returns the learner submission data in the format shown above and that filters out any assignment that is not due by the current date.
 // and also calculagtes the score of the assignments based on the submission date(10% deduction from the total score if it is late).
-
-//  function getLearnerData(course, ag, submissions) {
-//   let validGroup = validationOfAssignmentGroup(course,ag);
-//   if (validGroup === null){
-//     return []
-//   }
-
-// }
 
 
 // Helper function that calculates the valid submissions. 
@@ -148,5 +148,29 @@ function validationOfAssignmentGroup(courseInfo,assignmGroup){
     
   }
 
-let validGroup = validationOfAssignmentGroup(CourseInfo,AssignmentGroup);
-console.log(validGroup);
+// helper function that groups the submissions by learner_id
+function groupSubmissionsByLearner(submissions){
+  return submissions.reduce((acc, submission) => {
+    if (!acc[submission.learner_id]) {
+      acc[submission.learner_id] = [];
+    }
+    // Format each submission to include only the desired fields
+    const formattedSubmission = {
+      learner_id: submission.learner_id,
+      assignment_id: submission.assignment_id,
+      submitted_at: submission.submission.submitted_at,
+      score: submission.submission.score
+    };
+
+    // Push the formatted submission into the correct learner array
+    acc[submission.learner_id].push(formattedSubmission);
+    return acc;
+  }, {});
+}
+
+
+// Call the function and log the result to the console
+console.log(getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions));
+
+
+
