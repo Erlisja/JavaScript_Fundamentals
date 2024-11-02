@@ -77,7 +77,7 @@ const LearnerSubmissions = [
 ];
 
 //function getLearnerData(course, ag, submissions) {
-  // here, we would process this data to achieve the desired result.
+// here, we would process this data to achieve the desired result.
 //   const result = [
 //     {
 //       id: 125,
@@ -101,55 +101,103 @@ function getLearnerData(course, ag, submissions) {
   if (validGroupAssignments === null) {
     return []; // Exit if assignment group is invalid
   }
-
+  // create a result array to store the final results 
   const result = [];
+
+  // Group the submissions by learner_id- call the helper function and store the result in a variable
   const submissionsByLearner = groupSubmissionsByLearner(submissions);
-  
+
+  const today = new Date(); // Current date for coparison with due dates
+
+  // Process each learner's submissions
+  for (const learnerId in submissionsByLearner) {
+    const learnerSubmissions = submissionsByLearner[learnerId];
+    let totalScore = 0;
+    let totalPointsPossible = 0;
+    const learnerData = { student_id: parseInt(learnerId) }; // Store results for this learner
+
+    // iterate through each submission for the learner
+    learnerSubmissions.forEach(submission => {
+      // Find the matching assignment
+      let assignment = null;
+      for (const assgnm of ag.assignments) {
+        if (assgnm.id === submission.assignment_id) {
+          assignment = assgnm;
+          break;    // break the loop if the assignment is found
+        }
+      }
+
+      // If no assignment is found or the due date is in the future, skip to the next submission
+      if (!assignment || new Date(assignment.due_at) > today) {
+        return;
+      }
+
+      // Check if the submission was late a apply a 10% deduction from the points 
+      let score = submission.score;
+      if (new Date(submission.submitted_at) > new Date(assignment.due_at)) {
+        score *= 0.9;  // Apply 10% deduction
+      }
+
+      // Calculate the score fraction for this assignment
+      const assignmentScore = score / assignment.points_possible;
+      learnerData[submission.assignment_id] = assignmentScore;  // Store individual score
+
+      // Accumulate totals for average calculation
+      totalScore += score;
+      totalPointsPossible += assignment.points_possible;
+    });
+
+    // Calculate the average for the learner and store it
+    learnerData.avg_score = totalScore / totalPointsPossible;
+
+    // Add the learner's data to the result array
+    result.push(learnerData);
+  }
+
+
   return result;
+
 }
-
-// create an array that returns the learner submission data in the format shown above and that filters out any assignment that is not due by the current date.
-// and also calculagtes the score of the assignments based on the submission date(10% deduction from the total score if it is late).
-
 
 // Helper function that calculates the valid submissions. 
 //Valid submissions are considered the ones that course's id matches 
 
-function validationOfAssignmentGroup(courseInfo,assignmGroup){
+function validationOfAssignmentGroup(courseInfo, assignmGroup) {
   // check if ids do not match
-    // the try catch block will throw an error if the id do not match
-    try {
-    if (assignmGroup.course_id !== courseInfo.id){
-        throw new Error (`AssignmentGroup ID ${assignmGroup.course_id} does not match with the Course with ID ${courseInfo.id}`)
-      }
-     
-      // console.log("Course ID validation passed.");
-    }catch (error){
-      console.error(`Skipping Group ${error}`)
-      return null  // Return early if IDs don't match
-    }  
-
-    // check if the points_possible is not valid
-    // the function will return null if the points_possible is not a number or the points_possible is less than 0
-      try{
-      assignmGroup.assignments.forEach(assignment => {
-    if (typeof assignment.points_possible !== "number" || assignment.points_possible <= 0){
-      throw new Error (`Invalid points_possible ,${assignment.points_possible } points, for assignment ${assignment.id}`)
-
+  // the try catch block will throw an error if the id do not match
+  try {
+    if (assignmGroup.course_id !== courseInfo.id) {
+      throw new Error(`AssignmentGroup ID ${assignmGroup.course_id} does not match with the Course with ID ${courseInfo.id}`)
     }
-  });
-  // console.log("Assignments validation passed.");
-  }catch (error){
+
+    // console.log("Course ID validation passed.");
+  } catch (error) {
+    console.error(`Skipping Group ${error}`)
+    return null  // Return early if IDs don't match
+  }
+
+  // check if the points_possible is not valid
+  // the function will return null if the points_possible is not a number or the points_possible is less than 0
+  try {
+    assignmGroup.assignments.forEach(assignment => {
+      if (typeof assignment.points_possible !== "number" || assignment.points_possible <= 0) {
+        throw new Error(`Invalid points_possible ,${assignment.points_possible} points, for assignment ${assignment.id}`)
+
+      }
+    });
+    // console.log("Assignments validation passed.");
+  } catch (error) {
     console.error(`Skipping Group !${error} `)
     return null  // Return early if points_possible is not a number or less than 0
   }
-    // the function will return null if the id do not match or the points_possible is not a number or the points_possible is less than 0
-    return assignmGroup
-    
-  }
+  // the function will return null if the id do not match or the points_possible is not a number or the points_possible is less than 0
+  return assignmGroup
+
+}
 
 // helper function that groups the submissions by learner_id
-function groupSubmissionsByLearner(submissions){
+function groupSubmissionsByLearner(submissions) {
+  // using the reduce method to group the submissions by learner id
   return submissions.reduce((acc, submission) => {
     if (!acc[submission.learner_id]) {
       acc[submission.learner_id] = [];
@@ -164,7 +212,7 @@ function groupSubmissionsByLearner(submissions){
 
     // Push the formatted submission into the correct learner array
     acc[submission.learner_id].push(formattedSubmission);
-    return acc;
+    return acc;     // this will return the submissions grouped by learner_id which is an object
   }, {});
 }
 
